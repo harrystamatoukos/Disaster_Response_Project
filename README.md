@@ -2,13 +2,14 @@
 
 <h2>Project Motivation</h2>
 
-<p>In this project, I appled data engineering, natural language processing, and machine learning skills to analyze message data that people sent during disasters to build a model for an API that classifies disaster messages. These messages could potentially be sent to appropriate disaster relief agencies.</p>
+<p>This project creates a web app that classifies messages during a disaster. It combines data engineering ETL process and machine 
+  learning pipelines to build a model that classifies messages from a given pre-labeled dataset.</p>
 
 <h2>File Descriptions<h2>
-  <p>There are three main foleders:</p>
+  <p>There are three main folders:</p>
 
 <h4>data</h4>
-  <li>  disaster_categories.csv: dataset including all the categories </li>
+  <li> disaster_categories.csv: dataset including all the categories </li>
   <li> disaster_messages.csv: dataset including all the messages </li>
   <li> process_data.py: ETL pipeline scripts to read, clean, and save data into a database </li>
   <li> DisasterResponse.db: output of the ETL pipeline, i.e. SQLite database containing messages and categories data </li>

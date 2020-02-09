@@ -1,6 +1,7 @@
-<h1>Disaster Response Pipeline Project<h1>
+<h1>Disaster Response Pipeline Project</h1>
 
-<h2>Project Motivation<h2>
+<h2>Project Motivation</h2>
+
 <p>In this project, I appled data engineering, natural language processing, and machine learning skills to analyze message data that people sent during disasters to build a model for an API that classifies disaster messages. These messages could potentially be sent to appropriate disaster relief agencies.</p>
 
 <h2>File Descriptions<h2>
@@ -31,4 +32,3 @@ To run ETL pipeline that cleans data and stores in database python data/process_
 To run ML pipeline that trains classifier and saves python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl
 Run the following command in the app's directory to run your web app. python run.py
 
-Go to http://0.0.0.0:3001/

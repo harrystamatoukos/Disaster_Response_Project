@@ -14,6 +14,7 @@ from sqlalchemy import create_engine
 
 app = Flask(__name__)
 
+
 def tokenize(text):
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
@@ -24,6 +25,7 @@ def tokenize(text):
         clean_tokens.append(clean_tok)
 
     return clean_tokens
+
 
 # load data
 engine = create_engine('sqlite:///../data/DisasterResponse.db')
@@ -39,39 +41,59 @@ model = joblib.load("../models/classifier.plk")
 def index():
 
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
+
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
 
-    # create visuals
-    # TODO: Below is an example - modify to create your own visuals
-    graphs = [
-        {
-            'data': [
-                Bar(
-                    x=genre_names,
-                    y=genre_counts
-                )
-            ],
+    # data for visualizing category counts.
+    label_sums = df.iloc[:, 4:].sum()
+    label_names = list(label_sums.index)
 
-            'layout': {
-                'title': 'Distribution of Message Genres',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Genre"
-                }
+    # create visuals
+graphs = [
+    {
+        'data': [
+            Bar(
+                x=genre_names,
+                y=genre_counts
+            )
+        ],
+
+        'layout': {
+            'title': 'Distribution of Message Genres',
+            'yaxis': {
+                'title': "Count"
+            },
+            'xaxis': {
+                'title': "Genre"
             }
         }
-    ]
+    },
+    {
+        'data': [
+            Bar(
+                x=label_names,
+                y=label_sums,
+            )
+        ],
 
-    # encode plotly graphs in JSON
-    ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
-    graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
+        'layout': {
+            'title': 'Distribution of categories',
+            'yaxis': {
+                'title': "Count"
+            },
+            'xaxis': {
 
-    # render web page with plotly graphs
-    return render_template('master.html', ids=ids, graphJSON=graphJSON)
+            },
+        }
+    }
+]
+# encode plotly graphs in JSON
+ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
+graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
+
+# render web page with plotly graphs
+return render_template('master.html', ids=ids, graphJSON=graphJSON)
 
 
 # web page that handles user query and displays model results

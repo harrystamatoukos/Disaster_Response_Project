@@ -58,13 +58,11 @@ def clean_data(df):
 
 def save_data(df, database_filename, table_name='StaginMLtable'):
     """
-
     INPUT:
         df: Dataframe to be saved
         database_filepath - Filepath used for saving the database
     OUTPUT:
         Saves the database
-
     """
 
     engine = create_engine('sqlite:///'+database_filename)

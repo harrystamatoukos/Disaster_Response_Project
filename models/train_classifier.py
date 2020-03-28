@@ -1,36 +1,51 @@
+import pickle
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import classification_report
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.pipeline import Pipeline
+import re
+from sqlalchemy import create_engine
+import pandas as pd
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize, RegexpTokenizer
 import sys
 import nltk
 import numpy as np
 nltk.download(['punkt', 'wordnet'])
-from nltk.tokenize import word_tokenize, RegexpTokenizer
-from nltk.stem import WordNetLemmatizer
-import pandas as pd
-from sqlalchemy import create_engine
-import re
-from sklearn.pipeline import Pipeline
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.multioutput import MultiOutputClassifier
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.metrics import classification_report
-from sklearn.tree import DecisionTreeClassifier
-import pickle
 
 
-def load_data(database_filepath = '../data/DisasterResponse.db'):
-    '''Load data '''
+def load_data(database_filepath='../data/DisasterResponse.db'):
+    '''    A function that loads data from the created database
+
+    INPUT:
+        DisasterResponse.db
+    OUTPUT:
+        X - Returning the messages from the dataset
+        y - Returning the categories of the datasets
+        category_names - Returning the names of the categories
+    '''
 
     name = 'sqlite:///' + database_filepath
     engine = create_engine(name)
-    df = pd.read_sql_table('StaginMLtable', con=engine) # is table always called this?
+    df = pd.read_sql_table('StaginMLtable', con=engine)  # is table always called this?
     print(df.head())
     X = df['message']
     y = df[df.columns[4:]]
     category_names = y.columns
     return X, y, category_names
 
+
 def tokenize(text):
-    ''' TO DO '''
+    '''
+    INPUT:
+        The text we need to process
+
+    OUTPUT:
+        text after being tokenized, lowercased and lemmatized
+    '''
 
     url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     detected_urls = re.findall(url_regex, text)
@@ -51,7 +66,10 @@ def tokenize(text):
 
 
 def build_model():
-    '''  TODO:  '''
+    '''
+    Returns a pipeline model that has undergone tokenization,
+    CountVectorization, TfidfTransformation
+    '''
 
     moc = MultiOutputClassifier(RandomForestClassifier())
 
@@ -59,10 +77,10 @@ def build_model():
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
         ('clf', moc)
-        ])
+    ])
 
     parameters = {'clf__estimator__max_depth': [10, 50, None],
-              'clf__estimator__min_samples_leaf':[2, 5, 10]}
+                  'clf__estimator__min_samples_leaf': [2, 5, 10]}
 
     cv = GridSearchCV(pipeline, parameters)
     return cv
@@ -70,13 +88,18 @@ def build_model():
 
 def evaluate_model(model, X_test, Y_test, category_names):
 
-    Y_pred = model.predict(X_test)
-    print(classification_report(Y_test, Y_pred, target_names = category_names))
-    print('---------------------------------')
-    for i in range(Y_test.shape[1]):
-        print('%25s accuracy : %.2f' %(category_names[i], accuracy_score(Y_test[:,i], Y_pred[:,i])))
+""" The fucntion prints the precision, recall and f1-score """
+
+Y_pred = model.predict(X_test)
+print(classification_report(Y_test, Y_pred, target_names=category_names))
+print('---------------------------------')
+for i in range(Y_test.shape[1]):
+    print('%25s accuracy : %.2f' %
+          (category_names[i], accuracy_score(Y_test[:, i], Y_pred[:, i])))
+
 
 def save_model(model, model_filepath):
+    """ Saves the model to the disk  """
 
     pickle.dump(model, open(model_filepath, 'wb'))
 
@@ -103,9 +126,9 @@ def main():
         print('Trained model saved!')
 
     else:
-        print('Please provide the filepath of the disaster messages database '\
-              'as the first argument and the filepath of the pickle file to '\
-              'save the model to as the second argument. \n\nExample: python '\
+        print('Please provide the filepath of the disaster messages database '
+              'as the first argument and the filepath of the pickle file to '
+              'save the model to as the second argument. \n\nExample: python '
               'train_classifier.py ../data/DisasterResponse.db classifier.pkl')
 
 

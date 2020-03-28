@@ -88,7 +88,11 @@ def build_model():
 
 def evaluate_model(model, X_test, Y_test, category_names):
 
-""" The fucntion prints the precision, recall and f1-score """
+"""
+
+The fucntion prints the precision, recall and f1-score
+
+"""
 
 Y_pred = model.predict(X_test)
 print(classification_report(Y_test, Y_pred, target_names=category_names))

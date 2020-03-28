@@ -12,7 +12,6 @@ def load_data(messages_filepath, categories_filepath):
 
     A merged dataframe of the messages and categories datasets
 
-
     '''
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)

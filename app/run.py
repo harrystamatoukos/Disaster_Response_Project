@@ -13,8 +13,6 @@ import plotly.graph_objs as goo
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
-import gc
-
 
 app = Flask(__name__)
 
@@ -33,7 +31,7 @@ def tokenize(text):
 
 # load data
 engine = create_engine('sqlite:///../data/DisasterResponse.db')
-#df = pd.read_sql_table('StaginMLtable', engine)
+df = pd.read_sql_table('StaginMLtable', engine)
 
 # load model
 model = joblib.load("../models/classifier.plk")
@@ -48,7 +46,6 @@ print(model)
 def index():
 
     # extract data needed for visuals
-    df = pd.read_sql_table('StaginMLtable', engine)
 
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)

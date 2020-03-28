@@ -87,19 +87,16 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    The fucntion prints the precision, recall and f1-score
+    """
 
-"""
-
-The fucntion prints the precision, recall and f1-score
-
-"""
-
-Y_pred = model.predict(X_test)
-print(classification_report(Y_test, Y_pred, target_names=category_names))
-print('---------------------------------')
-for i in range(Y_test.shape[1]):
-    print('%25s accuracy : %.2f' %
-          (category_names[i], accuracy_score(Y_test[:, i], Y_pred[:, i])))
+    Y_pred = model.predict(X_test)
+    print(classification_report(Y_test, Y_pred, target_names=category_names))
+    print('---------------------------------')
+    for i in range(Y_test.shape[1]):
+        print('%25s accuracy : %.2f' %
+              (category_names[i], accuracy_score(Y_test[:, i], Y_pred[:, i])))
 
 
 def save_model(model, model_filepath):

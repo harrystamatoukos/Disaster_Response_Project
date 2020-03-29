@@ -1,6 +1,6 @@
 import pickle
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix, precision_recall_fscore_support
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.multioutput import MultiOutputClassifier
@@ -14,6 +14,7 @@ from nltk.tokenize import word_tokenize, RegexpTokenizer
 import sys
 import nltk
 import numpy as np
+from termcolor import colored, cprint
 nltk.download(['punkt', 'wordnet'])
 
 
@@ -74,12 +75,16 @@ def build_model():
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
-        ('clf', RandomForestClassifier(n_estimators=100,
-                                       max_features=0.1,
-                                       n_jobs=-1))
-    ])
+        ('clf', MultiOutputClassifier(RandomForestClassifier()))])
 
-    return pipeline
+    parameters = {'vect__min_df': [1, 5],
+                  'tfidf__use_idf': [True, False],
+                  'clf__estimator__n_estimators': [10, 25],
+                  'clf__estimator__min_samples_split': [2, 4]}
+
+    cv = GridSearchCV(pipeline, param_grid=parameters)
+
+    return cv
 
 
 def evaluate_model(model, X_test, y_test, category_names):
@@ -87,13 +92,30 @@ def evaluate_model(model, X_test, y_test, category_names):
     The fucntion prints the precision, recall and f1-score
     """
 
-    y_pred = pd.DataFrame(model.predict(X_test),
-                          index=y_test.index,
-                          columns=y_test.columns)
+    y_pred = model.predict(X_test)
 
-    for col in y_pred.columns:
-        print("Report for category “%s”:" % col)
-        print(classification_report(y_test[col], y_pred[col]))
+    for i, col in enumerate(category_names):
+        precision, recall, fscore, support = precision_recall_fscore_support(y_test[col],
+                                                                             y_pred[:, i],
+                                                                             average='weighted')
+
+        print('\nReport for the column ({}):\n'.format(
+            colored(col, 'red', attrs=['bold', 'underline'])))
+
+        if precision >= 0.75:
+            print('Precision: {}'.format(colored(round(precision, 2), 'green')))
+        else:
+            print('Precision: {}'.format(colored(round(precision, 2), 'yellow')))
+
+        if recall >= 0.75:
+            print('Recall: {}'.format(colored(round(recall, 2), 'green')))
+        else:
+            print('Recall: {}'.format(colored(round(recall, 2), 'yellow')))
+
+        if fscore >= 0.75:
+            print('F-score: {}'.format(colored(round(fscore, 2), 'green')))
+        else:
+            print('F-score: {}'.format(colored(round(fscore, 2), 'yellow')))
 
 
 def save_model(model, model_filepath):

@@ -30,7 +30,7 @@ def load_data(database_filepath='../data/DisasterResponse.db'):
 
     name = 'sqlite:///' + database_filepath
     engine = create_engine(name)
-    df = pd.read_sql_table('StaginMLtable', con=engine)  # is table always called this?
+    df = pd.read_sql_table('StaginMLtable', con=engine)
     print(df.head())
     X = df['message']
     y = df[df.columns[4:]]
@@ -71,32 +71,29 @@ def build_model():
     CountVectorization, TfidfTransformation
     '''
 
-    moc = MultiOutputClassifier(RandomForestClassifier())
-
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
-        ('clf', moc)
+        ('clf', RandomForestClassifier(n_estimators=100,
+                                       max_features=0.1,
+                                       n_jobs=-1))
     ])
 
-    parameters = {'clf__estimator__max_depth': [10, 50, None],
-                  'clf__estimator__min_samples_leaf': [2, 5, 10]}
-
-    cv = GridSearchCV(pipeline, parameters)
-    return cv
+    return pipeline
 
 
-def evaluate_model(model, X_test, Y_test, category_names):
+def evaluate_model(model, X_test, y_test, category_names):
     """
     The fucntion prints the precision, recall and f1-score
     """
 
-    Y_pred = model.predict(X_test)
-    print(classification_report(Y_test, Y_pred, target_names=category_names))
-    print('---------------------------------')
-    for i in range(Y_test.shape[1]):
-        print('%25s accuracy : %.2f' %
-              (category_names[i], accuracy_score(Y_test[:, i], Y_pred[:, i])))
+    y_pred = pd.DataFrame(model.predict(X_test),
+                          index=y_test.index,
+                          columns=y_test.columns)
+
+    for col in y_pred.columns:
+        print("Report for category “%s”:" % col)
+        print(classification_report(y_test[col], y_pred[col]))
 
 
 def save_model(model, model_filepath):

@@ -10,7 +10,7 @@ from flask import render_template, request, jsonify
 
 import plotly.graph_objs as goo
 
-from sklearn.externals import joblib
+import joblib
 from sqlalchemy import create_engine
 
 
@@ -30,11 +30,11 @@ def tokenize(text):
 
 
 # load data
-engine = create_engine('sqlite:///../data/DisasterResponse.db')
+engine = create_engine('sqlite:///./data/DisasterResponse.db')
 df = pd.read_sql_table('StaginMLtable', engine)
 
 # load model
-model = joblib.load("../models/classifier.plk")
+model = joblib.load("./models/classifier.plk")
 print(model)
 
 
